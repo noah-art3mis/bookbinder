@@ -1,11 +1,12 @@
 # Bookbinder & Antiquarian
 
-Tools for making bad ebooks readable.
+Text cleanup.
 
-Bookbinder is basic regex; Antiquarian is AI cleanup.
+`Bookbinder.py` is regex; `Antiquarian.py` is AI cleanup.
 
-## How to
+## TODO
 
--   set parameters
--   `python3 bookbinder.py`
--   `python3 antiquarian.py`
+-   The model only responds with 4096 tokens at maximum. This means you have to do some preprocessing before sending.
+    -   Add segmentation.
+    -   Add batching.
+    -   Add deferral to save on compute
