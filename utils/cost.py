@@ -15,10 +15,8 @@ def estimate_costs(model: str, n_tokens: int) -> None:
     output_cost = n_tokens * MODEL_OUTPUT
     total_cost = input_cost + output_cost
 
-    print("Antiquarian AI Cleanup Cost Estimation:")
-    print("Model: ", model)
-    print(f"Tokens: {n_tokens} + {n_tokens}")
-    print(f"Total Estimated Cost: ${total_cost:.2f}")
+    print(f"Cost Estimation: {n_tokens} + {n_tokens} = ${total_cost:.2f}")
+
 
 
 def get_costs_gpt4o(response) -> None:
@@ -34,8 +32,7 @@ def get_costs_gpt4o(response) -> None:
     output_cost = o_tokens * MODEL_OUTPUT
     total_cost = input_cost + output_cost
 
-    print(f"Cost: {input_cost:.4f} + {output_cost:.4f}")
-    print(f"Total Cost: ${total_cost:.2f}")
+    print(f"Cost: {input_cost:.4f} + {output_cost:.4f} = ${total_cost:.2f}")
 
 
 def get_n_tokens(model: str, text: str) -> int:
