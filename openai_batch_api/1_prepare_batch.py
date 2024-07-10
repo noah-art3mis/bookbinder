@@ -1,11 +1,17 @@
-import pandas as pd
-import numpy as np
+import os
 import json
 import tiktoken
-from batch_config import INPUT, OUTPUT, PROMPT, AI_MODEL
+import pandas as pd
+from batch_config import (
+    AI_MODEL,
+    INPUT,
+    PROMPT,
+    BATCH_FILE,
+    BATCH_SIZE_LIMIT,
+)
 
 
-def generate_batch_item(model: str, prompt: str, variable: str, id: str) -> object:
+def generate_batch_item(id: str, model: str, prompt: str, variable: str) -> object:
 
     message = prompt.replace("{variable}", variable)
     messages = [{"role": "user", "content": message}]
@@ -22,18 +28,49 @@ def generate_batch_item(model: str, prompt: str, variable: str, id: str) -> obje
     }
 
 
-def generate_batch(df: pd.DataFrame, output: str, model: str, prompt: str) -> None:
-    with open(output, "w", encoding="utf-8") as outfile:
-        for i, v in enumerate(df["decisao"]):
-            _id = str(f"{i:04}")
+def generate_batch(
+    df: pd.DataFrame, output_file: str, model: str, prompt: str, max_tokens: int
+) -> None:
+    current_file_index = 0
+    current_file_tokens = 0
+    current_file_data = []
 
-            item = generate_batch_item(
-                model=model,
-                prompt=prompt,
-                variable=v,
-                id=_id,
-            )
-            outfile.write(json.dumps(item) + "\n")
+    def write_current_file():
+        nonlocal current_file_index, current_file_tokens, current_file_data
+
+        if current_file_data:
+
+            output_file_root = os.path.splitext(output_file)[0]
+            file_name = f"{output_file_root}_{current_file_index:04}.jsonl"
+            with open(file_name, "w", encoding="utf-8") as outfile:
+                for index, item in enumerate(current_file_data):
+                    if index == len(current_file_data) - 1:  # last item
+                        outfile.write(json.dumps(item))
+                    else:
+                        outfile.write(json.dumps(item) + "\n")
+
+            current_file_index += 1
+            current_file_tokens = 0
+            current_file_data = []
+
+    for i, v in enumerate(df["decisao"]):
+        item = generate_batch_item(
+            id=str(f"{i:04}"),
+            model=model,
+            prompt=prompt,
+            variable=v,
+        )
+
+        item_str = json.dumps(item["body"]["messages"])  # type: ignore
+        item_tokens = len(item_str)
+
+        if current_file_tokens + item_tokens > max_tokens:
+            write_current_file()
+
+        current_file_data.append(item)
+        current_file_tokens += item_tokens
+
+    write_current_file()  # Write the remaining items to the last file
 
 
 def check_batch_cost(model: str, output: str) -> None:
@@ -45,7 +82,7 @@ def check_batch_cost(model: str, output: str) -> None:
             js = json.loads(item.strip())
             content = str(js["body"]["messages"])
             costs += estimate_batch_costs(model, content)
-        print(f"Cost Estimation: just the input will cost {costs:.2f}")
+        print(f"Cost Estimation: just the input will cost ${costs:.2f} USD")
 
 
 def estimate_batch_costs(model: str, content: str) -> float:
@@ -74,8 +111,9 @@ def get_n_tokens(model: str, text: str) -> int:
 
 def main():
     df = pd.read_csv(INPUT)
-    generate_batch(df, OUTPUT, AI_MODEL, PROMPT)
-    check_batch_cost(AI_MODEL, OUTPUT)
+    generate_batch(df, BATCH_FILE, AI_MODEL, PROMPT, BATCH_SIZE_LIMIT)
+    check_batch_cost(AI_MODEL, BATCH_FILE)  # TODO
+    print("batch prepared at ", BATCH_FILE)
 
 
 if __name__ == "__main__":

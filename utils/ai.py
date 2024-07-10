@@ -1,9 +1,16 @@
 from openai import OpenAI
+import os
+from dotenv import load_dotenv
 
 
 # @retry(tries=10, delay=1, backoff=2)
 def query_gpt(model: str, prompt: str):
-    client = OpenAI()
+    load_dotenv()
+    client = OpenAI(
+        organization=os.getenv("OPENAI_PROJECT"),
+        project=os.getenv("OPENAI_PROJECT"),
+        api_key=os.getenv("OPENAI_API_KEY"),
+    )
 
     message = client.chat.completions.create(
         model=model,

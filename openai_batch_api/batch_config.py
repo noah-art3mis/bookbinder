@@ -1,5 +1,10 @@
+FILE_ID = ""  # SET TO NONE IF STARTING TO USE
+BATCH_ID = ""  # SET TO NONE IF STARTING TO USE
+BATCH_SIZE_LIMIT = 80_000_000  # tokens
+
 INPUT = "input/stj/processos_3911.csv"
-OUTPUT = "output/stj/processos_3911_batch.jsonl"
+BATCH_FILE = "output/stj/processos_3911_pre_batch.jsonl"
+OUTPUT = "output/stj/processos_3911_post_batch.jsonl"
 AI_MODEL = "gpt-4o"
 
 PROMPT = """Você foi encarregado de analisar um documento jurídico chamado "certidão de julgamento" e responder a perguntas específicas sobre ele. Suas respostas devem ser fornecidas em formato JSON.
