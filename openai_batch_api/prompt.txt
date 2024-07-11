@@ -1,13 +1,4 @@
-FILE_ID = ""  # SET TO NONE IF STARTING TO USE
-BATCH_ID = ""  # SET TO NONE IF STARTING TO USE
-BATCH_SIZE_LIMIT = 80_000_000  # tokens
-
-INPUT = "input/stj/processos_3911.csv"
-BATCH_FILE = "output/stj/processos_3911_pre_batch.jsonl"
-OUTPUT = "output/stj/processos_3911_post_batch.jsonl"
-AI_MODEL = "gpt-4o"
-
-PROMPT = """Você foi encarregado de analisar um documento jurídico chamado "certidão de julgamento" e responder a perguntas específicas sobre ele. Suas respostas devem ser fornecidas em formato JSON.
+Você foi encarregado de analisar um documento jurídico chamado "certidão de julgamento" e responder a perguntas específicas sobre ele. Suas respostas devem ser fornecidas em formato JSON.
 
 Aqui está o texto da certidão de julgamento:
 
@@ -53,4 +44,4 @@ Forneça sua resposta no seguinte formato JSON:
 }
 </answer>
 
-Preencha os valores para cada chave com base em sua análise do texto. Lembre-se de usar null se não houver informações suficientes para responder a uma determinada pergunta."""
+Preencha os valores para cada chave com base em sua análise do texto. Lembre-se de usar null se não houver informações suficientes para responder a uma determinada pergunta.
