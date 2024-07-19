@@ -7,12 +7,13 @@ import pandas as pd
 # read this
 # https://cookbook.openai.com/examples/chat_finetuning_data_prep
 
-BATCH_SIZE_LIMIT = 80_000_000  # tier 4 org
 METADATA = {"description": "prophet_empty"}
-INPUT_FILE = "./input/prophet/book-5_pypdf_sentences_finetune_prev.feather"
 BATCH_FOLDER = "./output/prophet_empty/batches"
-BATCH_FILE_NAME = "book-5_pypdf_sentences_finetune_empty"
 BASE_MODEL = "babbage-002"
+FILE_NAME = "book-5_chunked88_withprev_nosample"
+
+INPUT_FILE = f"./input/prophet/{FILE_NAME}.csv"
+BATCH_SIZE_LIMIT = 80_000_000  # tier 4 org
 COLUMN = "content"
 
 
@@ -92,8 +93,7 @@ def generate_finetune_batch(
 
 
 def check_batch_cost(model: str, output_folder: str) -> None:
-    total_costs = 0
-
+    # TODO this is looking at all files in folder
     for file in os.listdir(output_folder):
         if file.endswith(".jsonl"):
             path = pathlib.Path(output_folder).joinpath(file)
@@ -105,9 +105,8 @@ def check_batch_cost(model: str, output_folder: str) -> None:
                     js = json.loads(item.strip())
                     content = str(js)
                     costs += estimate_finetune_costs(model, content)
-                total_costs += costs
 
-        print(f"Cost Estimation: finetune will cost ${costs:.2f} USD")
+                print(f"Cost Estimation: finetune will cost ${costs:.2f} USD")
 
 
 def estimate_finetune_costs(model: str, content: str) -> float:
@@ -140,10 +139,10 @@ def get_n_tokens(model: str, text: str) -> int:
 
 def main():
     generate_finetune_batch(
-        df=pd.read_feather(INPUT_FILE),
+        df=pd.read_csv(INPUT_FILE),
         col=COLUMN,
         output_folder=BATCH_FOLDER,
-        output_file=BATCH_FILE_NAME,
+        output_file=FILE_NAME,
         model=BASE_MODEL,
         max_tokens=BATCH_SIZE_LIMIT,
     )
