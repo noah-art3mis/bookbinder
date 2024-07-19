@@ -2,7 +2,7 @@
 
 Text cleanup.
 
-`Bookbinder.py` is regex; `Antiquarian.py` is AI cleanup. `openai_batch_api/batch.ipynb` is AI cleanup in batches.
+`Bookbinder.py` is regex; `Antiquarian.py` is AI cleanup. `openai_batch_api/batch.ipynb` is AI cleanup in batches and preparing finetune files.
 
 ## How to
 
