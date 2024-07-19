@@ -3,18 +3,20 @@ import json
 import pathlib
 import tiktoken
 import pandas as pd
+import numpy as np
 
 # read this
 # https://cookbook.openai.com/examples/chat_finetuning_data_prep
 
 METADATA = {"description": "prophet_empty"}
 BATCH_FOLDER = "./output/prophet_empty/batches"
-BASE_MODEL = "babbage-002"
-FILE_NAME = "book-5_chunked88_withprev_nosample"
+FILE_NAME = "book-5_chunked88_withprev_sample500"
 
 INPUT_FILE = f"./input/prophet/{FILE_NAME}.csv"
+BASE_MODEL = "gpt-3.5-turbo-0125"
 BATCH_SIZE_LIMIT = 80_000_000  # tier 4 org
-COLUMN = "content"
+QUESTION_COLUMN = "previous_sentence"
+ANSWER_COLUMN = "content"
 
 
 def generate_finetune_item(
@@ -45,7 +47,8 @@ def generate_finetune_item(
 
 def generate_finetune_batch(
     df: pd.DataFrame,
-    col: str,
+    question_col: str,
+    answer_col: str,
     output_folder: str,
     output_file: str,
     max_tokens: int,
@@ -65,23 +68,31 @@ def generate_finetune_batch(
 
             with open(file_name, "w", encoding="utf-8") as outfile:
 
+                costs = 0
                 for index, item in enumerate(current_file_data):
+                    result = json.dumps(item)
+                    costs += estimate_finetune_costs(model, result)
+
                     if index == len(current_file_data) - 1:  # last item
-                        outfile.write(json.dumps(item))
+                        outfile.write(result)
                     else:
-                        outfile.write(json.dumps(item) + "\n")
+                        outfile.write(result + "\n")
+                print(f"Cost Estimation: finetune will cost ${costs:.2f} USD")
 
             current_file_index += 1
             current_file_tokens = 0
             current_file_data = []
 
-    for item in df[col]:
-        question = ""
-        answer = item
+    for question, answer in zip(df[question_col], df[answer_col]):
 
-        item = generate_finetune_item(model, question, answer)
+        if question is None or question is np.nan:
+            question = ""
+
+        if answer is None or answer is np.nan:
+            answer = ""
 
         item_tokens = len(question + " " + answer)
+        item = generate_finetune_item(model, question, answer)
 
         if current_file_tokens + item_tokens > max_tokens:
             write_current_file()
@@ -90,23 +101,6 @@ def generate_finetune_batch(
         current_file_tokens += item_tokens
 
     write_current_file()  # Write the remaining items to the last file
-
-
-def check_batch_cost(model: str, output_folder: str) -> None:
-    # TODO this is looking at all files in folder
-    for file in os.listdir(output_folder):
-        if file.endswith(".jsonl"):
-            path = pathlib.Path(output_folder).joinpath(file)
-            with open(path, "r", encoding="utf-8") as _file:
-                batched = _file.readlines()
-
-                costs = 0
-                for item in batched:
-                    js = json.loads(item.strip())
-                    content = str(js)
-                    costs += estimate_finetune_costs(model, content)
-
-                print(f"Cost Estimation: finetune will cost ${costs:.2f} USD")
 
 
 def estimate_finetune_costs(model: str, content: str) -> float:
@@ -140,13 +134,13 @@ def get_n_tokens(model: str, text: str) -> int:
 def main():
     generate_finetune_batch(
         df=pd.read_csv(INPUT_FILE),
-        col=COLUMN,
+        question_col=QUESTION_COLUMN,
+        answer_col=ANSWER_COLUMN,
         output_folder=BATCH_FOLDER,
         output_file=FILE_NAME,
         model=BASE_MODEL,
         max_tokens=BATCH_SIZE_LIMIT,
     )
-    check_batch_cost(BASE_MODEL, BATCH_FOLDER)
     print("batches prepared at ", BATCH_FOLDER)
 
 

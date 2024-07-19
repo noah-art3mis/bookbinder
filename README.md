@@ -14,6 +14,7 @@ Because every project has different requirements, this needs to be manual every 
 
 ## TODO
 
+-   fix cost estimation to estimate just the file that was generated
 -   fix batch notebook to work when the batch job uses several files.
 -   refactor
 -   add poetry

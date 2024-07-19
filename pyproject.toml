@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "bookbinder"
+version = "0.1.0"
+description = "Text cleanup package for NLP tasks."
+authors = ["Gustavo Araujo Costa <gustavo@arcos.org.br>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+openai = "^1.36.0"
+tiktoken = "^0.7.0"
+python-dotenv = "^1.0.1"
+pandas = "^2.2.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
