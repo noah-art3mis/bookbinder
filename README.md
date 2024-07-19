@@ -17,6 +17,5 @@ Because every project has different requirements, this needs to be manual every 
 -   fix cost estimation to estimate just the file that was generated
 -   fix batch notebook to work when the batch job uses several files.
 -   refactor
--   add poetry
 -   Add segmentation.
 -   Add deferral to save on compute
