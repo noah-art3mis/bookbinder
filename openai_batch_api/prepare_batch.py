@@ -2,13 +2,6 @@ import os
 import json
 import tiktoken
 import pandas as pd
-from batch_config import (
-    AI_MODEL,
-    INPUT,
-    PROMPT,
-    BATCH_FILE,
-    BATCH_SIZE_LIMIT,
-)
 
 
 def generate_batch_item(id: str, model: str, prompt: str, variable: str) -> object:
